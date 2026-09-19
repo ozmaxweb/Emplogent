@@ -90,8 +90,11 @@ const KB=[
 const FALLBACK="Good question. I can help with AI agents, automation, websites, apps and custom AI. Tell me a little about your business and what you'd like to improve, and I'll suggest the best fit — or you can message the team on WhatsApp.";
 function addMsg(text,who,asHtml){const d=document.createElement('div');d.className='msg '+who;if(asHtml){d.innerHTML=text;}else{d.textContent=text;}body.appendChild(d);body.scrollTop=body.scrollHeight;}
 function match(q){const s=q.toLowerCase();for(const it of KB){if(it.k.some(k=>s.includes(k)))return it.a;}return FALLBACK;}
-function botReply(q){const t=document.createElement('div');t.className='typing';t.innerHTML='<span></span><span></span><span></span>';body.appendChild(t);body.scrollTop=body.scrollHeight;const d=Math.min(1100,500+q.length*12);setTimeout(()=>{t.remove();addMsg(match(q),'bot',true);},d);}
-function ask(q){if(!q.trim())return;addMsg(q,'user');input.value='';botReply(q);}
+const OBI_ENDPOINT='/api/chat'; // Obi backend. For n8n: set to your webhook URL, e.g. 'https://n8n.emplogent.com/webhook/obi'
+const history=[];
+function showTyping(){const t=document.createElement('div');t.className='typing';t.innerHTML='<span></span><span></span><span></span>';body.appendChild(t);body.scrollTop=body.scrollHeight;return t;}
+async function botReply(q){const t=showTyping();try{const res=await fetch(OBI_ENDPOINT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:history.slice(-8)})});const data=await res.json().catch(()=>({}));t.remove();if(res.ok&&data.reply){addMsg(data.reply,'bot');history.push({role:'assistant',content:data.reply});}else{addMsg((data&&data.error)||match(q).replace(/<[^>]+>/g,''),'bot');}}catch(e){t.remove();addMsg(match(q).replace(/<[^>]+>/g,''),'bot');}}
+function ask(q){if(!q.trim())return;addMsg(q,'user');history.push({role:'user',content:q});input.value='';botReply(q);}
 send.addEventListener('click',()=>ask(input.value));
 input.addEventListener('keydown',e=>{if(e.key==='Enter')ask(input.value)});
 chips.addEventListener('click',e=>{const b=e.target.closest('.chip');if(b)ask(b.dataset.q)});
