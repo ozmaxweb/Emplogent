@@ -10,7 +10,7 @@
 
 
   :root{
-    --logo:url("data:image/png;base64,__LOGO_DATA__");
+    --logo:url("assets/logo.png");
     --bg:#050506;
     --panel:rgba(15,15,20,.62);
     --panel-solid:#101015;
