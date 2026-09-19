@@ -26,3 +26,31 @@ SECURITY NOTES
     on your VPS) that holds the API key. Flow: browser -> your server -> AI -> reply.
     Add: input size limits, rate limiting, and CORS restricted to emplogent.com.
     Then update connect-src in vercel.json to allow only that endpoint's origin.
+
+------------------------------------------------------------
+OBI (AI ASSISTANT) — NOW WIRED UP (secure)
+------------------------------------------------------------
+Added: api/chat.js  -> a Vercel serverless function that talks to OpenAI.
+The website (app.js) calls /api/chat. The API key stays server-side only.
+
+TO TURN IT ON:
+  1. Get an OpenAI API key: platform.openai.com > API keys > Create.
+     Add billing, and IMPORTANT: set a monthly usage limit (Settings > Limits)
+     so costs stay capped.
+  2. In Vercel > your project > Settings > Environment Variables, add:
+        Name:  OPENAI_API_KEY
+        Value: <your key>
+        (apply to Production, Preview, Development)
+  3. Redeploy (Vercel > Deployments > Redeploy), or just push a commit.
+  4. Open the site and chat with Obi — now powered by real AI.
+
+If the key is missing or the API fails, Obi automatically falls back to the
+built-in sample answers, so the chat never looks broken.
+
+Built-in protections: server-side key, input length cap, max-tokens cap,
+per-IP rate limit (best-effort), and an origin check so other websites
+can't use your credits. For heavier traffic later, add Upstash Redis for
+cross-instance rate limiting.
+
+Model: gpt-4o-mini (cheap). To use Anthropic instead, swap the fetch block
+in api/chat.js to the Anthropic Messages API and use ANTHROPIC_API_KEY.
